@@ -72,7 +72,7 @@ if uploaded_file is not None:
 
             # ---- Summarization ----
             st.subheader("📰 Situation Summary (2–3 lines)")
-            summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+            summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
             try:
                 summary = summarizer(transcript.text, max_length=60, min_length=20, do_sample=False)
