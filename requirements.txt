@@ -3,3 +3,5 @@ assemblyai
 nltk
 wordcloud
 matplotlib
+transformers
+torch
