@@ -6,17 +6,16 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import nltk
-from transformers import pipeline
 
 # Download VADER lexicon if not already present
 nltk.download("vader_lexicon")
 
-# Direct API key
+# Directly set your API key here
 aai.settings.api_key = "4c5a787a36634384b228b0531ebd8c5d"
 
 # App Title
-st.title("🎙️ Audio Transcription, Sentiment & Summary")
-st.write("Upload an audio file → Get transcription → Sentiment → Word Cloud → Summary")
+st.title("🎙️ Audio Transcription & Sentiment Analysis")
+st.write("Upload an audio file, get transcription, analyze sentiment, and view a word cloud.")
 
 # File uploader
 uploaded_file = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
@@ -69,16 +68,6 @@ if uploaded_file is not None:
                 ax.imshow(wordcloud, interpolation="bilinear")
                 ax.axis("off")
                 st.pyplot(fig)
-
-            # ---- Summarization ----
-            st.subheader("📰 Situation Summary (2–3 lines)")
-            summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-
-            try:
-                summary = summarizer(transcript.text, max_length=60, min_length=20, do_sample=False)
-                st.write(summary[0]['summary_text'])
-            except Exception as e:
-                st.warning(f"Summarization skipped: {e}")
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
