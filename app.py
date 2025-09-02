@@ -2,14 +2,20 @@ import streamlit as st
 import assemblyai as aai
 import tempfile
 import os
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import nltk
 
-# ⚠️ Important: Don't hardcode API keys when deploying publicly.
-# Use Streamlit secrets instead: st.secrets["ASSEMBLYAI_API_KEY"]
-aai.settings.api_key = "4c5a787a36634384b228b0531ebd8c5d"
+# Download VADER lexicon if not already present
+nltk.download("vader_lexicon")
+
+# ⚠️ Use Streamlit secrets for API keys in production
+aai.settings.api_key = st.secrets["4c5a787a36634384b228b0531ebd8c5d"]
 
 # App Title
-st.title("🎙️ Audio Transcription App")
-st.write("Upload an audio file and get the transcription using AssemblyAI.")
+st.title("🎙️ Audio Transcription & Sentiment Analysis")
+st.write("Upload an audio file, get transcription, analyze sentiment, and view a word cloud.")
 
 # File uploader
 uploaded_file = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
@@ -34,7 +40,34 @@ if uploaded_file is not None:
             st.error(f"❌ Transcription failed: {transcript.error}")
         else:
             st.success("✅ Transcription complete!")
-            st.text_area("Transcribed Text", transcript.text, height=300)
+            st.text_area("📝 Transcribed Text", transcript.text, height=300)
+
+            # ---- Sentiment Analysis ----
+            st.subheader("📊 Sentiment Analysis")
+
+            sia = SentimentIntensityAnalyzer()
+            scores = sia.polarity_scores(transcript.text)
+            compound = scores["compound"]
+
+            if compound >= 0.05:
+                sentiment = "✅ Positive (No human harm)"
+            elif compound <= -0.05:
+                sentiment = "❌ Negative (Human life is in danger)"
+            else:
+                sentiment = "⚠️ Neutral (No life in danger, but needs attention)"
+
+            st.write(f"**Overall Sentiment:** {sentiment}")
+            st.json(scores)
+
+            # ---- Word Cloud ----
+            st.subheader("☁️ Word Cloud")
+            if transcript.text.strip():
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(transcript.text)
+
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.imshow(wordcloud, interpolation="bilinear")
+                ax.axis("off")
+                st.pyplot(fig)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
