@@ -10,8 +10,8 @@ import nltk
 # Download VADER lexicon if not already present
 nltk.download("vader_lexicon")
 
-# ⚠️ Use Streamlit secrets for API keys in production
-aai.settings.api_key = st.secrets["4c5a787a36634384b228b0531ebd8c5d"]
+# Directly set your API key here
+aai.settings.api_key = "4c5a787a36634384b228b0531ebd8c5d"
 
 # App Title
 st.title("🎙️ Audio Transcription & Sentiment Analysis")
