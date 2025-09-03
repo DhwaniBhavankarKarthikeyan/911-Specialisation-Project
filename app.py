@@ -21,54 +21,28 @@ st.set_page_config(
     layout="wide"
 )
 
-# ------------------- Dark Mode Toggle -------------------
-mode = st.sidebar.radio("🌗 Choose Theme", ["Light Mode", "Dark Mode"])
-
-if mode == "Dark Mode":
-    st.markdown("""
-    <style>
-    .stApp {
-        background: #0e1117;
-        color: #fafafa;
-        font-family: "Segoe UI", sans-serif;
-    }
-    .title {
-        text-align: center;
-        color: #60a5fa;
-        font-size: 40px !important;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    .subtitle {
-        text-align: center;
-        font-size: 20px !important;
-        color: #d1d5db;
-        margin-bottom: 40px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-    .stApp {
-        background: linear-gradient(135deg, #f9f9f9 0%, #e6f0ff 100%);
-        font-family: "Segoe UI", sans-serif;
-    }
-    .title {
-        text-align: center;
-        color: #1e3a8a;
-        font-size: 40px !important;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    .subtitle {
-        text-align: center;
-        font-size: 20px !important;
-        color: #444;
-        margin-bottom: 40px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# ------------------- Custom CSS -------------------
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(135deg, #f9f9f9 0%, #e6f0ff 100%);
+    font-family: "Segoe UI", sans-serif;
+}
+.title {
+    text-align: center;
+    color: #1e3a8a;
+    font-size: 40px !important;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.subtitle {
+    text-align: center;
+    font-size: 20px !important;
+    color: #444;
+    margin-bottom: 40px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ------------------- App Header -------------------
 st.markdown('<h1 class="title">🎙️ Audio Transcription & Sentiment Analysis</h1>', unsafe_allow_html=True)
@@ -96,9 +70,6 @@ if uploaded_file is not None:
             st.error(f"❌ Transcription failed: {transcript.error}")
         else:
             st.success("✅ Transcription complete!")
-
-            # ---- Audio Playback ----
-            st.audio(temp_filename, format="audio/mp3")
 
             # ---- Layout: Two Columns ----
             col1, col2 = st.columns(2)
@@ -136,13 +107,13 @@ if uploaded_file is not None:
 
                 if compound >= 0.05:
                     sentiment = "✅ Positive (No human harm)"
-                    sentiment_color = "#d1fae5" if mode == "Light Mode" else "#14532d"
+                    sentiment_color = "#d1fae5"  # green
                 elif compound <= -0.05:
                     sentiment = "❌ Negative (Human life is in danger)"
-                    sentiment_color = "#fee2e2" if mode == "Light Mode" else "#7f1d1d"
+                    sentiment_color = "#fee2e2"  # red
                 else:
                     sentiment = "⚠️ Neutral (No life in danger, but needs attention)"
-                    sentiment_color = "#fef9c3" if mode == "Light Mode" else "#78350f"
+                    sentiment_color = "#fef9c3"  # yellow
 
                 st.markdown(f"""
                 <div style="background-color:{sentiment_color};
@@ -152,6 +123,8 @@ if uploaded_file is not None:
                     <b>Overall Sentiment:</b> {sentiment}
                 </div>
                 """, unsafe_allow_html=True)
+
+                #st.json(scores)
 
                 # ---- Word Cloud ----
                 st.subheader("☁️ Word Cloud")
