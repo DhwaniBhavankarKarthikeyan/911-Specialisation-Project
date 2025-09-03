@@ -46,12 +46,16 @@ st.markdown("""
 
 # ------------------- App Header -------------------
 st.markdown('<h1 class="title">🎙️ Audio Transcription & Sentiment Analysis</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Upload audio → Get transcription → Sentiment insights → Word Cloud</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Upload audio → Play → Get transcription → Sentiment insights → Word Cloud</p>', unsafe_allow_html=True)
 
 # ------------------- File Uploader -------------------
 uploaded_file = st.file_uploader("📂 Upload an audio file", type=["mp3", "wav", "m4a"])
 
 if uploaded_file is not None:
+    # 🎵 Play uploaded audio
+    st.subheader("🔊 Play Uploaded Audio")
+    st.audio(uploaded_file, format="audio/mp3")
+
     # Save uploaded file temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
         tmp_file.write(uploaded_file.read())
@@ -123,8 +127,6 @@ if uploaded_file is not None:
                     <b>Overall Sentiment:</b> {sentiment}
                 </div>
                 """, unsafe_allow_html=True)
-
-                #st.json(scores)
 
                 # ---- Word Cloud ----
                 st.subheader("☁️ Word Cloud")
