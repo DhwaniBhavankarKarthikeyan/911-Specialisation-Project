@@ -12,7 +12,7 @@ import pandas as pd
 nltk.download("vader_lexicon")
 
 # Directly set your API key here
-aai.settings.api_key = "YOUR_API_KEY"  # replace with your AssemblyAI key
+aai.settings.api_key = "4c5a787a36634384b228b0531ebd8c5d"  # replace with your AssemblyAI key
 
 # ------------------- Page Config -------------------
 st.set_page_config(
