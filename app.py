@@ -12,7 +12,7 @@ import pandas as pd
 nltk.download("vader_lexicon")
 
 # Directly set your API key here
-aai.settings.api_key = "YOUR_API_KEY"
+aai.settings.api_key = "YOUR_API_KEY"  # replace with your AssemblyAI key
 
 # ------------------- Page Config -------------------
 st.set_page_config(
@@ -33,8 +33,8 @@ if st.session_state.dark_mode:
     st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-        color: #f5f5f5 !important;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #f1f5f9 !important;
         font-family: "Segoe UI", sans-serif;
     }
     .title {
@@ -47,7 +47,7 @@ if st.session_state.dark_mode:
     .subtitle {
         text-align: center;
         font-size: 20px !important;
-        color: #d1d5db !important;
+        color: #cbd5e1 !important;
         margin-bottom: 40px;
     }
     .stDownloadButton button, .stButton button {
@@ -119,4 +119,80 @@ if uploaded_file is not None:
     st.subheader("▶️ Play Uploaded Audio")
     st.audio(temp_filename, format="audio/mp3")
 
-    # (rest of your transcription + sentiment + wordcloud code stays the same)
+    try:
+        with st.spinner("⏳ Transcribing audio... please wait"):
+            # Configure transcription
+            config = aai.TranscriptionConfig(speech_model=aai.SpeechModel.universal)
+            transcriber = aai.Transcriber(config=config)
+            transcript = transcriber.transcribe(temp_filename)
+
+        if transcript.status == "error":
+            st.error(f"❌ Transcription failed: {transcript.error}")
+        else:
+            st.success("✅ Transcription complete!")
+
+            # ---- Layout: Two Columns ----
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.subheader("📝 Transcribed Text")
+                st.text_area("", transcript.text, height=400)
+
+                # ---- Download Options ----
+                if transcript.text.strip():
+                    st.download_button(
+                        label="📥 Download Transcript as TXT",
+                        data=transcript.text,
+                        file_name="transcript.txt",
+                        mime="text/plain"
+                    )
+
+                    df = pd.DataFrame([{"Transcript": transcript.text}])
+                    st.download_button(
+                        label="📥 Download Transcript as CSV",
+                        data=df.to_csv(index=False).encode("utf-8"),
+                        file_name="transcript.csv",
+                        mime="text/csv"
+                    )
+
+            with col2:
+                # ---- Sentiment Analysis ----
+                st.subheader("📊 Sentiment Analysis")
+                sia = SentimentIntensityAnalyzer()
+                scores = sia.polarity_scores(transcript.text)
+                compound = scores["compound"]
+
+                if compound >= 0.05:
+                    sentiment = "✅ Positive (No human harm)"
+                    sentiment_color = "#15803d" if st.session_state.dark_mode else "#d1fae5"
+                elif compound <= -0.05:
+                    sentiment = "❌ Negative (Human life is in danger)"
+                    sentiment_color = "#b91c1c" if st.session_state.dark_mode else "#fee2e2"
+                else:
+                    sentiment = "⚠️ Neutral (No life in danger, but needs attention)"
+                    sentiment_color = "#a16207" if st.session_state.dark_mode else "#fef9c3"
+
+                st.markdown(f"""
+                <div style="background-color:{sentiment_color};
+                            padding:15px;
+                            border-radius:10px;
+                            font-size:18px;
+                            color:white if st.session_state.dark_mode else black;">
+                    <b>Overall Sentiment:</b> {sentiment}
+                </div>
+                """, unsafe_allow_html=True)
+
+                # ---- Word Cloud ----
+                st.subheader("☁️ Word Cloud")
+                if transcript.text.strip():
+                    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(transcript.text)
+                    fig, ax = plt.subplots(figsize=(10, 5))
+                    ax.imshow(wordcloud, interpolation="bilinear")
+                    ax.axis("off")
+                    st.pyplot(fig)
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+    # Clean up temp file
+    os.remove(temp_filename)
