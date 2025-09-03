@@ -124,7 +124,7 @@ if uploaded_file is not None:
                 </div>
                 """, unsafe_allow_html=True)
 
-                st.json(scores)
+                #st.json(scores)
 
                 # ---- Word Cloud ----
                 st.subheader("☁️ Word Cloud")
