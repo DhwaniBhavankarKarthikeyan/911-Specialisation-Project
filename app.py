@@ -6,6 +6,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import nltk
+import pandas as pd
 
 # Download VADER lexicon if not already present
 nltk.download("vader_lexicon")
@@ -76,6 +77,25 @@ if uploaded_file is not None:
             with col1:
                 st.subheader("📝 Transcribed Text")
                 st.text_area("", transcript.text, height=400)
+
+                # ---- Download Options ----
+                if transcript.text.strip():
+                    # TXT download
+                    st.download_button(
+                        label="📥 Download Transcript as TXT",
+                        data=transcript.text,
+                        file_name="transcript.txt",
+                        mime="text/plain"
+                    )
+
+                    # CSV download
+                    df = pd.DataFrame([{"Transcript": transcript.text}])
+                    st.download_button(
+                        label="📥 Download Transcript as CSV",
+                        data=df.to_csv(index=False).encode("utf-8"),
+                        file_name="transcript.csv",
+                        mime="text/csv"
+                    )
 
             with col2:
                 # ---- Sentiment Analysis ----
